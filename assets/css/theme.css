@@ -1,52 +1,76 @@
-/* AI History & Money Making - Theme Stylesheet */
+/* AI History & Money Making - Retro 70s/90s Gaming Theme */
 
-/* Color Theme Variables */
+/* ============================================
+   RETRO 70s & 90s GAMING THEME
+   Neon colors, pixel vibes, psychedelic!
+   ============================================ */
+
 :root {
-  /* Primary Colors */
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-light: #3b82f6;
+  /* === 70s RETRO COLORS === */
+  /* Earth tones & avocado - 70s vibes */
+  --retro-70-brown: #8B4513;
+  --retro-70-avocado: #568203;
+  --retro-70-orange: #FF8C00;
+  --retro-70-mustard: #FFDB58;
+  --retro-70-cream: #FFFDD0;
+  --retro-70-teal: #008080;
+  --retro-70-burnt-orange: #CC5500;
   
-  /* Secondary Colors */
-  --secondary: #10b981;
-  --secondary-dark: #059669;
-  --secondary-light: #34d399;
+  /* === 90s NEON GAMING COLORS === */
+  /* Sega/Nintendo era neon */
+  --retro-90-hot-pink: #FF1493;
+  --retro-90-electric-blue: #00BFFF;
+  --retro-90-neon-green: #39FF14;
+  --retro-90-purple: #9400D3;
+  --retro-90-cyan: #00FFFF;
+  --retro-90-yellow: #FFFF00;
+  --retro-90-orange: #FF6600;
   
-  /* Accent Colors */
-  --accent: #f59e0b;
-  --accent-dark: #d97706;
-  --accent-light: #fbbf24;
+  /* Classic 90s console */
+  --nintendo-gray: #CCCCCC;
+  --sega-blue: #0060AA;
+  --gameboy-green: #9BBC0F;
   
-  /* Neutral Colors */
-  --dark: #1f2937;
-  --darker: #111827;
-  --gray: #6b7280;
-  --gray-light: #9ca3af;
-  --light: #f3f4f6;
-  --white: #ffffff;
+  /* Dark theme base */
+  --dark-bg: #0a0a12;
+  --dark-surface: #1a1a2e;
+  --dark-card: #16213e;
   
-  /* Semantic Colors */
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
+  /* Modern accent colors */
+  --primary: #FF1493;  /* Hot pink from 90s */
+  --primary-dark: #C71585;
+  --primary-light: #FF69B4;
   
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --secondary: #00BFFF;  /* Electric blue */
+  --secondary-dark: #0099CC;
+  --secondary-light: #00E5FF;
+  
+  --accent: #39FF14;  /* Neon green */
+  --accent-dark: #2ECC00;
+  --accent-light: #7FFF00;
+  
+  /* Text colors */
+  --text-dark: #eeeeee;
+  --text-light: #aaaaaa;
+  --text-neon: #00FFFF;
+  
+  /* Background */
+  --bg-light: #f5f5f5;
+  --bg-white: #ffffff;
+  --bg-dark: #0a0a12;
+  --bg-card: #1a1a2e;
   
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  --gradient-secondary: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  --gradient-dark: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  --gradient-primary: linear-gradient(135deg, #FF1493 0%, #9400D3 100%);
+  --gradient-retro: linear-gradient(135deg, #FF8C00 0%, #FF1493 50%, #9400D3 100%);
+  --gradient-neon: linear-gradient(135deg, #00BFFF 0%, #39FF14 50%, #FFFF00 100%);
+  --gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #0a0a12 100%);
+  --gradient-arcade: linear-gradient(180deg, #0a0a12 0%, #1a1a2e 50%, #0a0a12 100%);
   
   /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  --font-sans: 'Courier New', monospace;
+  --font-mono: 'VT323', 'Courier New', monospace;
+  --font-retro: 'Press Start 2P', cursive, sans-serif;
   
   /* Spacing */
   --space-xs: 0.25rem;
@@ -57,78 +81,200 @@
   --space-2xl: 3rem;
   --space-3xl: 4rem;
   
+  /* Borders & Shadows */
+  --border-retro: 3px solid #FF1493;
+  --border-neon: 2px solid #39FF14;
+  --shadow-glow: 0 0 10px #FF1493, 0 0 20px #FF1493;
+  --shadow-neon: 0 0 10px #39FF14, 0 0 20px #39FF14;
+  
   /* Border Radius */
-  --radius-sm: 0.25rem;
-  --radius: 0.5rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  --radius-sm: 0;
+  --radius: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
   --radius-full: 9999px;
   
   /* Transitions */
   --transition: all 0.2s ease;
   --transition-slow: all 0.3s ease;
-  --transition-slower: all 0.5s ease;
 }
 
-/* Dark Theme */
-[data-theme="dark"] {
-  --bg-primary: #1f2937;
-  --bg-secondary: #111827;
-  --bg-tertiary: #374151;
-  --text-primary: #f9fafb;
-  --text-secondary: #d1d5db;
-  --text-muted: #9ca3af;
-  --border-color: #374151;
+/* Dark Retro Theme (default) */
+:root, [data-theme="retro"] {
+  --bg-primary: #0a0a12;
+  --bg-secondary: #1a1a2e;
+  --bg-tertiary: #16213e;
+  --text-primary: #eeeeee;
+  --text-secondary: #aaaaaa;
+  --text-muted: #666666;
+  --border-color: #333355;
 }
 
-/* Light Theme (default) */
-:root, [data-theme="light"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-tertiary: #f3f4f6;
-  --text-primary: #1f2937;
-  --text-secondary: #4b5563;
-  --text-muted: #9ca3af;
-  --border-color: #e5e7eb;
+/* Light 70s Theme */
+[data-theme="70s"] {
+  --bg-primary: #FFFDD0;
+  --bg-secondary: #FFF8DC;
+  --bg-tertiary: #F5DEB3;
+  --text-primary: #4a3728;
+  --text-secondary: #6b5344;
+  --border-color: #8B4513;
+  --primary: #FF8C00;
+  --secondary: #008080;
+  --accent: #568203;
+}
+
+/* 90s Gaming Theme */
+[data-theme="90s"] {
+  --bg-primary: #0a0a12;
+  --bg-secondary: #1a1a2e;
+  --bg-tertiary: #16213e;
+  --text-primary: #00FFFF;
+  --text-secondary: #FF1493;
+  --border-color: #39FF14;
+  --primary: #FF1493;
+  --secondary: #00BFFF;
+  --accent: #39FF14;
 }
 
 /* Theme Toggle */
 .theme-toggle {
-  background: none;
-  border: none;
+  background: #FF1493;
+  border: 2px solid #39FF14;
   cursor: pointer;
   padding: 0.5rem;
   border-radius: var(--radius);
   transition: var(--transition);
+  font-family: var(--font-mono);
 }
 
 .theme-toggle:hover {
-  background: var(--bg-tertiary);
+  box-shadow: var(--shadow-glow);
+  transform: scale(1.05);
 }
 
-.theme-toggle svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
+/* Era-Specific Retro Styles */
+.era-1950s { 
+  background: linear-gradient(135deg, #8B4513, #FF8C00);
+  color: #FFFDD0;
+}
+.era-1970s { 
+  background: linear-gradient(135deg, #568203, #FF8C00);
+  color: #FFFDD0;
+}
+.era-1980s { 
+  background: linear-gradient(135deg, #FF1493, #9400D3);
+  color: white;
+}
+.era-1990s { 
+  background: linear-gradient(135deg, #00BFFF, #FF1493, #39FF14);
+  color: white;
+}
+.era-2000s { 
+  background: linear-gradient(135deg, #0060AA, #00BFFF);
+  color: white;
+}
+.era-2020s { 
+  background: linear-gradient(135deg, #FF6600, #FF1493);
+  color: white;
 }
 
-/* Brand Colors for Sections */
-.brand-primary { color: var(--primary); }
-.brand-secondary { color: var(--secondary); }
-.brand-accent { color: var(--accent); }
+/* Retro Card Styles */
+.retro-card {
+  background: var(--bg-card);
+  border: var(--border-retro);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-glow);
+  transition: var(--transition);
+}
 
-.bg-primary { background-color: var(--primary); }
-.bg-secondary { background-color: var(--secondary); }
-.bg-accent { background-color: var(--accent); }
+.retro-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-neon);
+  border-color: var(--accent);
+}
 
-/* Era-Specific Colors */
-.era-1950s { --section-color: #3b82f6; }
-.era-1980s { --section-color: #8b5cf6; }
-.era-2000s { --section-color: #06b6d4; }
-.era-2020s { --section-color: #f59e0b; }
+/* Neon Text */
+.neon-text {
+  color: #00FFFF;
+  text-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF, 0 0 20px #00FFFF;
+}
 
-/* Money Card Colors */
-.money-affiliate { --money-color: #10b981; }
-.money-digital { --money-color: #3b82f6; }
-.money-consulting { --money-color: #8b5cf6; }
-.money-premium { --money-color: #f59e0b; }
+.neon-pink {
+  color: #FF1493;
+  text-shadow: 0 0 5px #FF1493, 0 0 10px #FF1493;
+}
+
+.neon-green {
+  color: #39FF14;
+  text-shadow: 0 0 5px #39FF14, 0 0 10px #39FF14;
+}
+
+/* Arcade Button Style */
+.arcade-btn {
+  background: linear-gradient(180deg, #FF1493 0%, #C71585 100%);
+  border: 3px solid #39FF14;
+  border-radius: 8px;
+  color: white;
+  padding: 1rem 2rem;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 0 #990066, 0 0 10px #FF1493;
+}
+
+.arcade-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #990066, 0 0 20px #FF1493;
+}
+
+.arcade-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #990066;
+}
+
+/* Retro Section Dividers */
+.retro-divider {
+  height: 4px;
+  background: var(--gradient-retro);
+  border: none;
+  margin: 2rem 0;
+}
+
+.retro-divider-neon {
+  height: 2px;
+  background: var(--gradient-neon);
+  border: none;
+  box-shadow: var(--shadow-neon);
+  margin: 2rem 0;
+}
+
+/* Pixel Art Avatar Placeholder */
+.pixel-avatar {
+  width: 80px;
+  height: 80px;
+  background: var(--gradient-retro);
+  border: 3px solid #39FF14;
+  image-rendering: pixelated;
+  box-shadow: var(--shadow-neon);
+}
+
+/* Scanline Effect Overlay */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+}
