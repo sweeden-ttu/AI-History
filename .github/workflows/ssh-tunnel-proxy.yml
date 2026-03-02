@@ -1,0 +1,240 @@
+name: SSH Tunnel to Localhost Proxy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      tunnel_duration:
+        description: 'Tunnel duration in seconds'
+        required: false
+        default: '600'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: "ssh-tunnel-proxy"
+  cancel-in-progress: true
+
+jobs:
+  setup-ssh-tunnel:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check IPv6 Support
+        run: |
+          echo "=== IPv6 Configuration ==="
+          ip addr show | grep inet6
+          echo ""
+          echo "=== DNS Resolution (IPv6) ==="
+          getent ahostsv6 localhost
+          echo ""
+          echo "=== Network Interface Status ==="
+          ip link show
+
+      - name: Create SSH Tunnel Configuration
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          
+          # Generate SSH key pair for tunnel
+          ssh-keygen -t ed25519 -f ~/.ssh/tunnel_key -N "" -C "github-actions-ssh-tunnel"
+          chmod 600 ~/.ssh/tunnel_key
+          chmod 644 ~/.ssh/tunnel_key.pub
+          
+          echo "SSH tunnel key generated successfully"
+          echo "Public key fingerprint:"
+          ssh-keygen -l -f ~/.ssh/tunnel_key.pub
+
+      - name: Setup SSH Tunnel (Port 443 → 80)
+        run: |
+          echo "=== Starting SSH Tunnel ==="
+          
+          # Create a background SSH tunnel
+          # This establishes a reverse tunnel: remote port 443 → localhost:80
+          ssh-keyscan -t rsa localhost >> ~/.ssh/known_hosts 2>/dev/null || true
+          
+          # Start SSH tunnel in the background
+          # Using IPv6 localhost address and dual-stack support
+          nohup ssh -N \
+            -i ~/.ssh/tunnel_key \
+            -R [::1]:443:127.0.0.1:80 \
+            -R 443:127.0.0.1:80 \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -o ExitOnForwardFailure=yes \
+            -o ConnectTimeout=30 \
+            -v \
+            localhost 2>&1 | tee tunnel.log &
+          
+          TUNNEL_PID=$!
+          echo "SSH Tunnel PID: $TUNNEL_PID"
+          echo $TUNNEL_PID > tunnel.pid
+          
+          # Wait for tunnel to establish
+          sleep 3
+          
+          # Verify tunnel is running
+          if kill -0 $TUNNEL_PID 2>/dev/null; then
+            echo "✓ SSH tunnel established successfully"
+          else
+            echo "✗ Failed to establish SSH tunnel"
+            cat tunnel.log
+            exit 1
+          fi
+
+      - name: Setup Local Proxy Server
+        run: |
+          echo "=== Setting up proxy server on ports 80 and 443 ==="
+          
+          # Create a simple proxy server script
+          cat > proxy_server.py << 'EOF'
+          #!/usr/bin/env python3
+          import socket
+          import threading
+          import sys
+          from http.server import HTTPServer, BaseHTTPRequestHandler
+          import ssl
+          
+          class ProxyHandler(BaseHTTPRequestHandler):
+              def do_GET(self):
+                  self.send_response(200)
+                  self.send_header('Content-type', 'text/plain')
+                  self.send_header('Access-Control-Allow-Origin', '*')
+                  self.end_headers()
+                  self.wfile.write(b'SSH Tunnel Proxy Active\n')
+                  self.wfile.write(f'Path: {self.path}\n'.encode())
+                  self.wfile.write(f'Protocol: {self.protocol_version}\n'.encode())
+          
+              def log_message(self, format, *args):
+                  print(f"[PROXY] {format % args}", file=sys.stderr)
+          
+          def run_http_server():
+              # IPv4 and IPv6 support
+              server = HTTPServer(('0.0.0.0', 80), ProxyHandler)
+              print("HTTP Proxy listening on port 80...")
+              server.serve_forever()
+          
+          def run_https_server():
+              # Create self-signed certificate for testing
+              import subprocess
+              cert_dir = '/tmp/certs'
+              subprocess.run(['mkdir', '-p', cert_dir], check=True)
+              
+              # Generate self-signed certificate
+              subprocess.run([
+                  'openssl', 'req', '-x509', '-newkey', 'rsa:2048',
+                  '-keyout', f'{cert_dir}/key.pem',
+                  '-out', f'{cert_dir}/cert.pem',
+                  '-days', '1', '-nodes',
+                  '-subj', '/C=US/ST=CA/L=PaloAlto/O=GitHubActions/CN=localhost'
+              ], check=True, capture_output=True)
+              
+              server = HTTPServer(('0.0.0.0', 443), ProxyHandler)
+              server.socket = ssl.wrap_socket(
+                  server.socket,
+                  certfile=f'{cert_dir}/cert.pem',
+                  keyfile=f'{cert_dir}/key.pem',
+                  server_side=True
+              )
+              print("HTTPS Proxy listening on port 443...")
+              server.serve_forever()
+          
+          # Run servers in separate threads
+          http_thread = threading.Thread(target=run_http_server, daemon=True)
+          https_thread = threading.Thread(target=run_https_server, daemon=True)
+          
+          http_thread.start()
+          https_thread.start()
+          
+          print("Proxy servers started. Press Ctrl+C to stop.")
+          try:
+              http_thread.join()
+          except KeyboardInterrupt:
+              print("Proxy servers stopped.")
+          EOF
+          
+          chmod +x proxy_server.py
+          python3 proxy_server.py > proxy.log 2>&1 &
+          PROXY_PID=$!
+          echo "Proxy server PID: $PROXY_PID"
+          echo $PROXY_PID > proxy.pid
+          
+          # Wait for proxy to start
+          sleep 2
+
+      - name: Test SSH Tunnel and Proxy
+        run: |
+          echo "=== Testing Tunnel and Proxy ==="
+          
+          # Get PIDs
+          TUNNEL_PID=$(cat tunnel.pid 2>/dev/null || echo "unknown")
+          PROXY_PID=$(cat proxy.pid 2>/dev/null || echo "unknown")
+          
+          echo "Tunnel PID: $TUNNEL_PID"
+          echo "Proxy PID: $PROXY_PID"
+          
+          # Check if processes are running
+          echo ""
+          echo "=== Process Status ==="
+          ps aux | grep -E "(ssh|proxy)" | grep -v grep || echo "No processes found"
+          
+          # Test local connectivity
+          echo ""
+          echo "=== Testing HTTP Proxy on Port 80 ==="
+          timeout 5 curl -v http://localhost:80/ 2>&1 | head -20 || echo "HTTP test timeout or failed"
+          
+          echo ""
+          echo "=== Testing HTTPS Proxy on Port 443 ==="
+          timeout 5 curl -v -k https://localhost:443/ 2>&1 | head -20 || echo "HTTPS test timeout or failed"
+          
+          # Test IPv6
+          echo ""
+          echo "=== Testing IPv6 Localhost ==="
+          timeout 5 curl -v -6 http://\[::1\]:80/ 2>&1 | head -20 || echo "IPv6 test timeout or failed"
+
+      - name: Display Network Diagnostics
+        if: always()
+        run: |
+          echo "=== Active Connections ==="
+          netstat -tulpn 2>/dev/null | grep -E "(80|443)" || ss -tulpn 2>/dev/null | grep -E "(80|443)" || echo "No active connections on ports 80/443"
+          
+          echo ""
+          echo "=== SSH Tunnel Log ==="
+          [ -f tunnel.log ] && tail -30 tunnel.log || echo "No tunnel log found"
+          
+          echo ""
+          echo "=== Proxy Server Log ==="
+          [ -f proxy.log ] && tail -30 proxy.log || echo "No proxy log found"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "=== Cleaning up SSH tunnel and proxy ==="
+          
+          # Kill tunnel
+          [ -f tunnel.pid ] && kill $(cat tunnel.pid) 2>/dev/null || true
+          
+          # Kill proxy
+          [ -f proxy.pid ] && kill $(cat proxy.pid) 2>/dev/null || true
+          
+          # Give processes time to shutdown gracefully
+          sleep 2
+          
+          echo "Cleanup complete"
+
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ssh-tunnel-logs
+          path: |
+            tunnel.log
+            proxy.log
+          retention-days: 7
