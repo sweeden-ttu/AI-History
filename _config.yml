@@ -3,3 +3,18 @@ title: AI History & Money Making
 description: Explore AI's complete evolution from 1950s to present and discover how to monetize the AI revolution.
 show_downloads: false
 theme: jekyll-theme-minimal
+
+# Build settings
+markdown: kramdown
+plugins: []
+
+# Include pages directory
+include:
+  - pages
+  - blog
+
+# Collections
+collections:
+  blog:
+    output: true
+    permalink: /blog/:name/
