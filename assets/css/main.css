@@ -692,19 +692,8 @@ footer a:hover {
   color: #666666;
 }
 
-<<<<<<< Current (Your changes)
-<<<<<<< Current (Your changes)
-.footer-bottom p::after {
-=======
-.footer-bottom::after {
->>>>>>> Incoming (Background Agent changes)
-  content: "Built with love in Palo Alto.";
-  display: block;
-  margin-top: 0.5rem;
-=======
 .footer-bottom p::after {
   content: " • Built with love in Palo Alto";
->>>>>>> Incoming (Background Agent changes)
 }
 
 /* Chat Widget */
