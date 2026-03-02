@@ -136,3 +136,5 @@ MIT License - Feel free to use and modify for your own projects.
 ---
 
 Built with 🤖 and Mixtral via OpenRouter
+
+Built with love in Palo Alto.
