@@ -1,0 +1,125 @@
+#include <cstdlib>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
+static const std::string kServerName = "__SERVER_NAME__";
+static const std::string kTargetExtension = "__EXTENSION__";
+static const std::string kStrategy = "__STRATEGY__";
+static const std::string kRagContext = R"RAG(__RAG_CONTEXT__)RAG";
+static const std::vector<std::string> kCompletionWords = __COMPLETION_JSON__;
+
+struct DocumentStore {
+    std::unordered_map<std::string, std::string> docs;
+};
+
+bool readMessage(std::string& body) {
+    std::string line;
+    int contentLength = -1;
+    while (std::getline(std::cin, line)) {
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+        if (line.empty()) {
+            break;
+        }
+        const std::string prefix = "Content-Length:";
+        if (line.rfind(prefix, 0) == 0) {
+            std::string value = line.substr(prefix.size());
+            contentLength = std::atoi(value.c_str());
+        }
+    }
+    if (contentLength <= 0) {
+        return false;
+    }
+    body.resize(static_cast<size_t>(contentLength));
+    std::cin.read(body.data(), static_cast<std::streamsize>(contentLength));
+    return std::cin.good() || std::cin.gcount() == contentLength;
+}
+
+void sendMessage(const json& payload) {
+    std::string body = payload.dump();
+    std::cout << "Content-Length: " << body.size() << "\r\n\r\n" << body;
+    std::cout.flush();
+}
+
+json completionResult() {
+    json items = json::array();
+    for (size_t i = 0; i < kCompletionWords.size(); ++i) {
+        items.push_back({
+            {"label", kCompletionWords[i]},
+            {"kind", 6},
+            {"detail", "generated"},
+            {"sortText", std::to_string(i)},
+            {"insertText", kCompletionWords[i]},
+        });
+    }
+    return {
+        {"isIncomplete", false},
+        {"items", items},
+    };
+}
+
+int main() {
+    bool shouldExit = false;
+    DocumentStore store;
+
+    while (!shouldExit) {
+        std::string body;
+        if (!readMessage(body)) {
+            break;
+        }
+
+        json request;
+        try {
+            request = json::parse(body);
+        } catch (...) {
+            continue;
+        }
+
+        if (!request.contains("method")) {
+            continue;
+        }
+
+        std::string method = request["method"].get<std::string>();
+        json id = request.contains("id") ? request["id"] : json(nullptr);
+
+        if (method == "initialize") {
+            json result = {
+                {"capabilities",
+                 {
+                     {"textDocumentSync", 1},
+                     {"completionProvider", {{"resolveProvider", false}, {"triggerCharacters", json::array({".", ":"})}}},
+                 }},
+                {"serverInfo", {{"name", kServerName}, {"version", "0.1.0"}}},
+            };
+            sendMessage({{"jsonrpc", "2.0"}, {"id", id}, {"result", result}});
+        } else if (method == "shutdown") {
+            sendMessage({{"jsonrpc", "2.0"}, {"id", id}, {"result", nullptr}});
+        } else if (method == "exit") {
+            shouldExit = true;
+        } else if (method == "textDocument/didOpen") {
+            auto params = request.value("params", json::object());
+            auto textDocument = params.value("textDocument", json::object());
+            std::string uri = textDocument.value("uri", "");
+            std::string text = textDocument.value("text", "");
+            store.docs[uri] = text;
+        } else if (method == "textDocument/didChange") {
+            auto params = request.value("params", json::object());
+            std::string uri = params.value("textDocument", json::object()).value("uri", "");
+            auto changes = params.value("contentChanges", json::array());
+            if (!uri.empty() && !changes.empty()) {
+                store.docs[uri] = changes[0].value("text", "");
+            }
+        } else if (method == "textDocument/completion") {
+            sendMessage({{"jsonrpc", "2.0"}, {"id", id}, {"result", completionResult()}});
+        }
+    }
+    return 0;
+}

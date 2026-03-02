@@ -104,8 +104,8 @@ jobs:
           nohup ssh -N \
             -i ~/.ssh/tunnel_key \
             -o IdentitiesOnly=yes \
-            -R [::1]:${TUNNEL_PORT}:127.0.0.1:${LOCAL_HTTP_PORT} \
-            -R ${TUNNEL_PORT}:127.0.0.1:${LOCAL_HTTP_PORT} \
+            -R [::1]:${TUNNEL_PORT}:ai4all.io:${LOCAL_HTTP_PORT} \
+            -R ${TUNNEL_PORT}:ai4all.io:${LOCAL_HTTP_PORT} \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             -o ExitOnForwardFailure=yes \
