@@ -1,0 +1,27 @@
+---
+description: Enforce plain text markdown in underscore folders
+globs: **/_*/**/*.md
+alwaysApply: false
+---
+
+# Plain Text Markdown in Underscore Folders
+
+When generating or editing `.md` files under folders whose names start with `_`:
+
+- Use plain Markdown only (headings, paragraphs, lists, links, code fences).
+- Do not use raw HTML blocks or inline HTML tags.
+- Keep formatting simple and readable; avoid decorative or layout-heavy markup.
+- Avoid badges, embedded widgets, and non-text presentation elements.
+- Use ASCII by default unless non-ASCII is explicitly required by content.
+- Do not add YAML frontmatter unless the user asks for it.
+
+## Preferred Example
+
+```markdown
+# Title
+
+A short paragraph in plain language.
+
+- Key point one
+- Key point two
+```
